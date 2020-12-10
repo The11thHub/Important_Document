@@ -1,0 +1,32 @@
+---
+ - hosts: localhost
+
+   become: yes
+   vars:
+     service_name:
+       - httpd
+       - firewalld
+
+
+   tasks:
+      
+      - name: Check if Service Exists
+        shell: systemctl status "{{ service_name }}".service
+        register: service_status
+
+      - debug:
+          msg: " The {{service_name}} does not exists"
+        when: service_status.rc == 0
+
+      - name: Install a list of packages with a list variable
+        yum:
+          name: "{{ packages }}"
+        vars:
+          packages:
+          - httpd
+          - firewalld
+        when: service_status.rc == 0
+      
+      - debug:
+          msg: " The {{ packages }} are already installed"
+        when: service_status.rc != 0
